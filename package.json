@@ -1,0 +1,30 @@
+{
+  "name": "quote-ai-usage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Push LLM AI usage as images to quote/0 device via Dot API",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "preview": "DEBUG_PNG=preview.png tsx src/index.ts --dry-run",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.worker.json --noEmit",
+    "postinstall": "node scripts/copy-wasm.mjs",
+    "worker:dev": "wrangler dev",
+    "worker:deploy": "wrangler deploy"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260426.1",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.85.0"
+  },
+  "dependencies": {
+    "@resvg/resvg-wasm": "^2.6.2",
+    "satori": "^0.26.0"
+  }
+}

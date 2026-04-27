@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "WebWorker"],
+    "types": ["@cloudflare/workers-types"],
+    "moduleResolution": "Bundler"
+  },
+  "include": [
+    "src/worker.ts",
+    "src/render.worker.ts",
+    "src/render.ts",
+    "src/dot-client.ts",
+    "src/config.ts",
+    "src/types.ts",
+    "src/worker-assets.d.ts"
+  ]
+}
