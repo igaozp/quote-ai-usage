@@ -76,8 +76,11 @@ Codex 的 token 总数与 `primary.usedPercent`，**不要**给 Codex 加 USD �
 - 客户端封装在 `src/dot-client.ts`。`apiKey` 不带 `dot_app_` 前缀，
   `DotClient` 内部拼
 - 错误统一抛 `DotApiError`（携 status / code / body）
-- 限流 10 req/s；plugin Stop hook 触发频繁但每次推送间隔自然 > 1s，目前
-  不需要限流；如果加 debounce 就加在 cli 层
+- Dot 自身限流 10 req/s。我们另外用 `src/debounce.ts` 做跨进程 throttle：
+  默认 `USAGE_COOLDOWN=60s` 内每个 cooldown 周期至多一次推送
+- 两种模式：`quote-ai push`（wait，会 sleep 到可推）；
+  `quote-ai push --skip-if-cooling`（plugin Stop hook 用，cooldown 内直接
+  退出不阻塞）
 
 ## 不要做的事
 
@@ -93,6 +96,5 @@ Codex 的 token 总数与 `primary.usedPercent`，**不要**给 Codex 加 USD �
 ## 待办（详见 docs/roadmap.md）
 
 1. 增量游标（offset 缓存）
-2. push 防抖
-3. 多模板 / 多窗口（taskKey）
-4. 失败重试 + 上报
+2. 多模板 / 多窗口（taskKey）
+3. 失败重试 + 上报

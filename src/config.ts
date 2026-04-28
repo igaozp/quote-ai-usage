@@ -10,6 +10,7 @@ export interface EnvLike {
   DOT_API_BASE_URL?: string;
   USAGE_TIMEZONE?: string;
   USAGE_INTERVAL?: string;
+  USAGE_COOLDOWN?: string;
   CLAUDE_HOME?: string;
   CODEX_HOME?: string;
   DEBUG_PNG?: string;

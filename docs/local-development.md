@@ -28,6 +28,7 @@ assets/fonts/Bold.ttf      # weight 700
 | `DOT_API_BASE_URL` | 覆盖默认 base URL | |
 | `USAGE_TIMEZONE` | IANA 时区，默认 `Asia/Shanghai` | |
 | `USAGE_INTERVAL` | watch 模式间隔，默认 `30m`（支持 `30s` / `5m` / `1h`）| |
+| `USAGE_COOLDOWN` | 推送最小间隔，默认 `60s`（`0` 关闭）| |
 | `CLAUDE_HOME` | 覆盖 `~/.claude` | |
 | `CODEX_HOME` | 覆盖 `~/.codex` | |
 | `DEBUG_PNG` | 设置后将渲染结果同时写入此路径 | |
@@ -52,6 +53,23 @@ quote-ai watch --interval=10m
 # 类型检查
 bun run typecheck
 ```
+
+### 推送防抖（throttle）
+
+`push` 默认走跨进程 throttle：每 `USAGE_COOLDOWN`（默认 60 秒）至多一次。
+两种模式：
+
+| 调用形式 | 行为 |
+|---------|------|
+| `quote-ai push` | **wait 模式**：cooldown 未到则 sleep 等到能推；并发请求拿不到 lock 立即返回 |
+| `quote-ai push --skip-if-cooling` | **skip 模式**：cooldown 未到直接退出，不阻塞调用方（plugin Stop hook 用这个） |
+
+参数与环境变量：
+
+- `--cooldown=10s` 覆盖 `USAGE_COOLDOWN`，0 = 完全关闭
+- `--dry-run` 不走 throttle（仅本地肉眼检查）
+- 状态文件：`~/.cache/quote-ai-usage/{state.json,push.lock}`，可通过
+  `QUOTE_AI_CACHE` 改路径；`state.json` 只记 `lastPushAt`
 
 ### 关于 preview
 

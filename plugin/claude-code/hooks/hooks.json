@@ -5,7 +5,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "quote-ai push",
+          "command": "quote-ai push --skip-if-cooling",
           "timeout": 30
         }
       ]

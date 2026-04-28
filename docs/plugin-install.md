@@ -55,12 +55,14 @@ New-Item -ItemType SymbolicLink `
 ## 行为细节
 
 - **Stop hook**：每次 Claude Code 完成一轮回答（不论是文字还是工具调用）
-  都会触发 `quote-ai push`。该命令本身约耗时 1-2 秒（读 jsonl + 渲染 + Dot
-  网络往返），不会阻塞下一轮交互
+  都会触发 `quote-ai push --skip-if-cooling`
+- **`--skip-if-cooling`**：如果距上次推送 < `USAGE_COOLDOWN`（默认 60s），
+  这次直接退出，不阻塞 hook。所以连续多轮回答最多每分钟推一次
 - **超时 30s**：在 `hooks.json` 里设了 `timeout: 30`，万一卡住会被中断
 - **失败静默**：push 内部异常只打到 stderr，不会让 Claude Code 报错
-- **频次**：每次 Stop 触发一次。如果你嫌频繁，可以把 hook 的 matcher 改成
-  特定工具或自行加 debounce
+- **想换频率**：直接改 `USAGE_COOLDOWN`（如 `10s` / `5m`），无需动 hook
+- **跨进程 throttle**：基于 `~/.cache/quote-ai-usage/push.lock` + `state.json`
+  实现，多个 Claude Code 实例共用同一 cooldown
 
 ## 卸载
 

@@ -19,7 +19,15 @@
       "Bash(bun install *)",
       "Bash(bun run *)",
       "Bash(bun src/cli.ts preview ./preview.png)",
-      "Bash(bun src/cli.ts help)"
+      "Bash(bun src/cli.ts help)",
+      "Bash(rm -rf ~/.cache/quote-ai-usage)",
+      "Bash(USAGE_COOLDOWN=10s bun src/cli.ts push --dry-run)",
+      "Bash(DOT_API_KEY=fake DOT_DEVICE_ID=fake USAGE_COOLDOWN=10s bun src/cli.ts push)",
+      "Bash(DOT_API_KEY=fake DOT_DEVICE_ID=fake USAGE_COOLDOWN=8s bun src/cli.ts push)",
+      "Bash(time DOT_API_KEY=fake DOT_DEVICE_ID=fake USAGE_COOLDOWN=8s bun src/cli.ts push)",
+      "Bash(wait)",
+      "Bash(DOT_API_KEY=fake DOT_DEVICE_ID=fake USAGE_COOLDOWN=4s bun src/cli.ts push --skip-if-cooling)",
+      "Bash(DOT_API_KEY=fake DOT_DEVICE_ID=fake USAGE_COOLDOWN=4s bun src/cli.ts push)"
     ]
   }
 }

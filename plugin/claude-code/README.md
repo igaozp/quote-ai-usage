@@ -3,8 +3,11 @@
 This directory is the Claude Code plugin entry for the parent project. It
 exposes:
 
-- **Stop hook** — runs `quote-ai push` after every Claude Code turn so the
-  Dot device reflects fresh token usage with no manual action.
+- **Stop hook** — runs `quote-ai push --skip-if-cooling` after every
+  Claude Code turn so the Dot device reflects fresh token usage with no
+  manual action. The `--skip-if-cooling` flag means consecutive turns
+  inside the throttle window (default 60s) return immediately without
+  blocking the hook.
 - **`/push-usage` slash command** — manually trigger one push.
 
 ## Prerequisites

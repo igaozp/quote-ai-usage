@@ -5,9 +5,17 @@
 记录每个 jsonl 文件上次读到的 byte offset 与 mtime；下次只读追加部分，把今日
 增量加到一个滚动 `today.json`。
 
-## 2. 防抖与频次控制
-Plugin Stop hook 触发频繁，连续多轮回答可能 1 秒内调多次。可在 cli 入口加
-基于文件锁的 debounce（默认 30~60s 内多次触发只发一次最终值）。
+## 2. ✅ 防抖与频次控制（已完成）
+跨进程 throttle 已落地，见 `src/debounce.ts`：lock 文件 + `state.json`
+持久化 `lastPushAt`。两种模式：
+
+- `wait`（默认）：cooldown 期内 sleep 到可推
+- `skip`（`--skip-if-cooling`）：cooldown 期内立即返回，plugin hook 用
+
+可继续做的小改进：
+- 失败时 backoff（当前失败也更新 `lastPushAt`，避免风暴；但若 Dot 长时间
+  挂掉，可加指数 backoff 把 cooldown 临时拉长）
+- trailing run：cooldown 末尾自动补一次，确保抓到"最后一次状态"
 
 ## 3. 多模板
 - "今日 / 本周 / 本月" 三视图
