@@ -70,5 +70,7 @@
 | `assets/fonts/Bold.ttf` | 体重 700 的字体（gitignored）| 双端 |
 | `scripts/copy-wasm.mjs` | postinstall 钩子：复制 resvg wasm | build-time |
 | `wrangler.toml` | Workers 部署配置 | Workers |
-| `tsconfig.json` | Node 代码 typecheck | build-time |
+| `tsconfig.json` | TypeScript solution 入口（references）| build-time |
+| `tsconfig.base.json` | 共享 compilerOptions | build-time |
+| `tsconfig.node.json` | Node 代码 typecheck | build-time |
 | `tsconfig.worker.json` | Worker 代码 typecheck | build-time |

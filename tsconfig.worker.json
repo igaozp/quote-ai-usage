@@ -1,9 +1,8 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2022", "WebWorker"],
-    "types": ["@cloudflare/workers-types"],
-    "moduleResolution": "Bundler"
+    "types": ["@cloudflare/workers-types"]
   },
   "include": [
     "src/worker.ts",

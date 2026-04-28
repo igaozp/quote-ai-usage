@@ -58,7 +58,7 @@ export default {
 
     if (url.pathname === "/preview") {
       const png = await renderUsageCardWorker(demoData());
-      return new Response(png, {
+      return new Response(png as BodyInit, {
         headers: { "Content-Type": "image/png" },
       });
     }

@@ -77,7 +77,9 @@ assets/fonts/         Regular.ttf / Bold.ttf（gitignored）
 scripts/copy-wasm.mjs postinstall 钩子
 docs/                 完整设计文档
 wrangler.toml         Workers 部署配置
-tsconfig.json         Node 代码 tsconfig
+tsconfig.json         TypeScript solution（references 入口）
+tsconfig.base.json    共享 compilerOptions
+tsconfig.node.json    Node 代码 tsconfig
 tsconfig.worker.json  Worker 代码 tsconfig
 ```
 

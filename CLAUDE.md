@@ -24,11 +24,13 @@
 - `RenderFont.data` 是 `ArrayBuffer`（不是 `Buffer`、不是 `Uint8Array`）。
   Node 端用 `buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)`
   转成独立 ArrayBuffer。
-- 两个 tsconfig：
-  - `tsconfig.json`：Node 代码，`types: ["node"]`，`lib` 含 DOM
-  - `tsconfig.worker.json`：Worker 代码，`types: ["@cloudflare/workers-types"]`，
+- TypeScript 用 solution-style 配置，IDE（VSCode/Zed）按 references 自动选对：
+  - `tsconfig.json` — solution 入口，`files: []` + 两个 `references`
+  - `tsconfig.base.json` — 共享 compilerOptions
+  - `tsconfig.node.json` — Node 代码，`types: ["node"]`，`lib` 含 DOM
+  - `tsconfig.worker.json` — Worker 代码，`types: ["@cloudflare/workers-types"]`，
     `lib` 用 `WebWorker` 不含 DOM 与 node
-- `npm run typecheck` 同时跑两个；改完代码必须两个都过。
+- `npm run typecheck` 同时跑 node 与 worker 两个 project；改完代码必须两个都过。
 
 ## 资源管线
 
