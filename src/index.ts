@@ -14,7 +14,7 @@ export {
 } from "./user-config.js";
 export type {
   UsageData,
-  UsageStat,
+  CardRow,
   RenderFont,
   RenderOptions,
 } from "./render.js";

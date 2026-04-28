@@ -44,7 +44,7 @@ export async function saveUserConfig(cfg: StoredConfig): Promise<string> {
   const dir = userConfigDir();
   await mkdir(dir, { recursive: true });
   const path = userConfigPath();
-  await writeFile(path, JSON.stringify(cfg, null, 2));
+  await writeFile(path, JSON.stringify(cfg, null, 2), { mode: 0o600 });
   // Best-effort 0600 on POSIX; Windows ACLs ignore the call.
   if (platform() !== "win32") {
     try {

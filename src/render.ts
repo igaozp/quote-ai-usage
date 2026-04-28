@@ -4,17 +4,22 @@ import { Resvg, initWasm } from "@resvg/resvg-wasm";
 export const CARD_WIDTH = 296;
 export const CARD_HEIGHT = 152;
 
-export interface UsageStat {
+export interface CardRow {
+  /** Left label (e.g. "CLAUDE", "CODEX") */
   label: string;
-  value: string;
+  /** Right-aligned headline value (e.g. "$12.34", "2% USED") */
+  primary: string;
+  /** Bottom-row text shown when there's no progress bar (e.g. "13.0M tok") */
+  secondary?: string;
+  /** 0-100 → render a progress bar instead of `secondary`. */
+  progressPct?: number;
+  /** Right-aligned small text on the bottom row (e.g. "RESETS 3H 53M") */
+  meta?: string;
 }
 
 export interface UsageData {
   title: string;
-  primary: string;
-  secondary?: string;
-  stats?: UsageStat[];
-  updatedAt?: string;
+  rows: CardRow[];
 }
 
 export interface RenderFont {
@@ -67,7 +72,7 @@ interface Node {
   type: string;
   props: {
     style?: Record<string, unknown>;
-    children?: Node | string | Array<Node | string | null | undefined>;
+    children?: Node | string | Array<Node | string>;
   };
 }
 
@@ -78,89 +83,158 @@ function div(
   return { type: "div", props: { style, children } };
 }
 
+function compact<T>(arr: Array<T | null | undefined | false>): T[] {
+  return arr.filter((x): x is T => Boolean(x));
+}
+
+// ---------- layout constants (296x152) ----------
+const PADDING_X = 10;
+const TITLE_HEIGHT = 22;
+const CARD_GAP = 4;
+const CARD_HEIGHT_INNER = (CARD_HEIGHT - TITLE_HEIGHT - PADDING_X * 0 - CARD_GAP * 1 - 8) / 2; // 2 rows
+const BAR_WIDTH = 150;
+const BAR_HEIGHT = 10;
+const BAR_BORDER = 2;
+
 function buildTree(data: UsageData): Node {
-  const stats = data.stats ?? [];
   return div(
     {
       display: "flex",
       flexDirection: "column",
       width: "100%",
       height: "100%",
-      padding: "10px 14px",
       backgroundColor: "white",
       color: "black",
       fontFamily: "UI",
     },
     [
+      // Title
       div(
         {
           display: "flex",
-          fontSize: 10,
-          fontWeight: 400,
-          letterSpacing: 1.2,
-          textTransform: "uppercase",
+          padding: `6px ${PADDING_X}px 2px`,
+          fontSize: 13,
+          fontWeight: 700,
+          letterSpacing: 2,
         },
         data.title,
       ),
+      // Cards container
       div(
         {
           display: "flex",
-          fontSize: 38,
-          fontWeight: 700,
-          lineHeight: 1.05,
-          marginTop: 2,
+          flexDirection: "column",
+          padding: `0 ${PADDING_X}px ${PADDING_X}px`,
+          gap: CARD_GAP,
+          flex: 1,
         },
-        data.primary,
+        data.rows.map(renderCard),
       ),
-      data.secondary
-        ? div(
-            { display: "flex", fontSize: 11, marginTop: 1 },
-            data.secondary,
-          )
-        : null,
-      div({ display: "flex", flex: 1 }),
-      stats.length > 0
-        ? div(
+    ],
+  );
+}
+
+function renderCard(row: CardRow): Node {
+  return div(
+    {
+      display: "flex",
+      flexDirection: "column",
+      flex: 1,
+      border: "1px solid black",
+      padding: "5px 8px",
+      justifyContent: "space-between",
+    },
+    [
+      // Top row: label (left) + primary (right)
+      div(
+        {
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        },
+        [
+          div(
             {
               display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "flex-end",
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: 2,
             },
-            [
-              ...stats.map((s) =>
-                div(
-                  { display: "flex", flexDirection: "column" },
-                  [
-                    div(
-                      {
-                        display: "flex",
-                        fontSize: 8,
-                        letterSpacing: 1,
-                        textTransform: "uppercase",
-                      },
-                      s.label,
-                    ),
-                    div(
-                      { display: "flex", fontSize: 14, fontWeight: 700 },
-                      s.value,
-                    ),
-                  ],
-                ),
-              ),
-              data.updatedAt
-                ? div(
-                    {
-                      display: "flex",
-                      fontSize: 9,
-                      alignSelf: "flex-end",
-                    },
-                    data.updatedAt,
-                  )
-                : null,
-            ],
-          )
-        : null,
+            row.label,
+          ),
+          div(
+            {
+              display: "flex",
+              fontSize: 17,
+              fontWeight: 700,
+              lineHeight: 1,
+            },
+            row.primary,
+          ),
+        ],
+      ),
+      // Bottom row: progress bar OR secondary text, plus meta
+      div(
+        {
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        },
+        compact([
+          row.progressPct != null
+            ? renderProgressBar(row.progressPct)
+            : row.secondary
+              ? div(
+                  {
+                    display: "flex",
+                    fontSize: 10,
+                    fontWeight: 700,
+                  },
+                  row.secondary,
+                )
+              : div({ display: "flex" }, ""),
+          row.meta
+            ? div(
+                {
+                  display: "flex",
+                  fontSize: 9,
+                  fontWeight: 400,
+                  letterSpacing: 1,
+                },
+                row.meta,
+              )
+            : null,
+        ]),
+      ),
+    ],
+  );
+}
+
+function renderProgressBar(pct: number): Node {
+  const clamped = Math.max(0, Math.min(100, pct));
+  const innerWidth = BAR_WIDTH - BAR_BORDER * 2 - 2; // account for inner padding
+  const filled = Math.max(0, Math.round((clamped / 100) * innerWidth));
+  return div(
+    {
+      display: "flex",
+      width: BAR_WIDTH,
+      height: BAR_HEIGHT,
+      border: `${BAR_BORDER}px solid black`,
+      padding: 1,
+      alignItems: "stretch",
+    },
+    [
+      div(
+        {
+          display: "flex",
+          width: filled,
+          height: "100%",
+          backgroundColor: "black",
+        },
+        "",
+      ),
     ],
   );
 }
