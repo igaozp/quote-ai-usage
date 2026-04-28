@@ -6,7 +6,15 @@
       "Bash(npm run *)",
       "Bash(node scripts/copy-wasm.mjs)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(gh repo *)",
+      "WebFetch(domain:github.com)",
+      "Bash(DEBUG_PNG=preview.png npx tsx src/cli.ts push --dry-run)",
+      "Bash(node bin/quote-ai.mjs help)",
+      "Bash(node -e 'console.log\\(require.resolve\\(\"tsx/cli\"\\)\\)')",
+      "Bash(DEBUG_PNG=preview.png node bin/quote-ai.mjs push --dry-run)",
+      "Bash(git restore *)",
+      "Bash(node bin/quote-ai.mjs preview ./preview.png)"
     ]
   }
 }

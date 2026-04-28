@@ -10,7 +10,8 @@
   "scripts": {
     "push": "tsx src/cli.ts push",
     "watch": "tsx src/cli.ts watch",
-    "preview": "DEBUG_PNG=preview.png tsx src/cli.ts push --dry-run",
+    "preview": "tsx src/cli.ts preview",
+    "preview:open": "tsx src/cli.ts preview --open",
     "dev": "tsx src/cli.ts push",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"

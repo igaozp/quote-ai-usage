@@ -32,13 +32,15 @@ assets/fonts/Bold.ttf      # weight 700
 ## 命令
 
 ```bash
+# 仅本地验证：渲染今日真实数据为 PNG，不调 Dot
+npm run preview                  # 输出 preview.png
+npm run preview:open             # 输出后自动调系统默认应用打开
+quote-ai preview                 # 等价（npm link 后可用）
+quote-ai preview ./out.png --open
+
 # 一次性：聚合今日数据 + 渲染 + 推送
 npm run push
-quote-ai push                    # 等价（前提是已 npm link）
-
-# 仅渲染、不推送，并把 PNG 写到 preview.png
-npm run preview
-DEBUG_PNG=preview.png quote-ai push --dry-run
+quote-ai push                    # 等价
 
 # 守护模式（默认每 30 分钟一次）
 npm run watch
@@ -47,6 +49,13 @@ quote-ai watch --interval=10m
 # 类型检查
 npm run typecheck
 ```
+
+### 关于 preview
+
+`preview` 子命令内部走的是 `--dry-run` 路径：照常执行 collector 与渲染、把
+PNG 写到指定路径，但跳过 `loadConfig` 与 Dot API 调用。所以**不需要**配置
+`DOT_API_KEY` / `DOT_DEVICE_ID` 也能跑——只用来在本地肉眼看真实数据下的渲染
+效果。
 
 ## 暴露 quote-ai 到全局 PATH
 

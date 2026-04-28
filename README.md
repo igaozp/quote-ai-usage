@@ -18,8 +18,9 @@ npm install
 cp .env.example .env                     # 填 DOT_API_KEY / DOT_DEVICE_ID
 # 把字体放到 assets/fonts/Regular.ttf 与 Bold.ttf（参考 assets/fonts/README.md）
 
-npm run preview                          # 渲染 demo → preview.png（不推送）
-npm run push                             # 渲染今日真实数据 → 真推送
+npm run preview                          # 渲染今日真实数据 → preview.png（不推送）
+npm run preview:open                     # 同上，并自动用系统默认应用打开
+npm run push                             # 渲染 + 真推送
 npm run watch                            # 守护模式，默认每 30 分钟一次
 
 npm link && quote-ai help                # 把 quote-ai 暴露到全局 PATH
@@ -29,8 +30,8 @@ npm link && quote-ai help                # 把 quote-ai 暴露到全局 PATH
 
 | 命令 | 说明 |
 |------|------|
+| `quote-ai preview [out.png] [--open]` | 仅渲染，不推送；不需要 `DOT_*` 环境变量 |
 | `quote-ai push` | 一次性：聚合今日数据 + 渲染 + 推送 |
-| `quote-ai push --dry-run` | 仅渲染，不推送（配 `DEBUG_PNG=preview.png`）|
 | `quote-ai watch [--interval=30m]` | 进程内定时器，每 N 分钟一次 |
 | `quote-ai help` | 用法说明 |
 
