@@ -11,10 +11,14 @@ Code 在每次会话结束后自动调一次 `quote-ai push`，无需任何外�
 cd <repo-root>
 bun install
 bun link                           # 让 quote-ai 进入全局 PATH
-cp .env.example .env               # 填 DOT_API_KEY / DOT_DEVICE_ID
+quote-ai config                    # 交互式录入 DOT_API_KEY / DOT_DEVICE_ID
 # assets/fonts/{Regular,Bold}.ttf   按 README 放好字体
-quote-ai preview                   # 验证整条链路（不需要 DOT_*）
+quote-ai preview                   # 验证整条链路（不需要凭证）
 ```
+
+> Plugin Stop hook 是非交互（无 TTY），如果 `quote-ai push` 第一次启动时
+> 还没配置过，hook 会立即报错退出而不是卡在向导上。所以**装插件之前
+> 务必先跑一次 `quote-ai config`**。
 
 > shebang 用 `#!/usr/bin/env bun`，所以目标机器的 PATH 必须能找到 `bun`。
 > 如果不想全局装 bun，跑 `bun run build:bin` 把 `dist/quote-ai` 二进制产出

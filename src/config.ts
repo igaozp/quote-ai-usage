@@ -1,3 +1,5 @@
+import { loadUserConfig } from "./user-config.js";
+
 export interface AppConfig {
   apiKey: string;
   deviceId: string;
@@ -17,15 +19,35 @@ export interface EnvLike {
   QUOTE_AI_CACHE?: string;
 }
 
-export function loadConfig(env: EnvLike): AppConfig {
-  const apiKey = env.DOT_API_KEY?.trim();
-  const deviceId = env.DOT_DEVICE_ID?.trim();
-  if (!apiKey) throw new Error("Missing DOT_API_KEY");
-  if (!deviceId) throw new Error("Missing DOT_DEVICE_ID");
+export class ConfigMissingError extends Error {
+  readonly missing: readonly string[];
+  constructor(missing: readonly string[]) {
+    super(`Missing config: ${missing.join(", ")}`);
+    this.name = "ConfigMissingError";
+    this.missing = missing;
+  }
+}
+
+/**
+ * Resolve credentials from env first, then the on-disk user config
+ * (`~/.config/quote-ai-usage/config.json`). Throws ConfigMissingError when
+ * apiKey or deviceId still cannot be found.
+ */
+export async function resolveAppConfig(env: EnvLike): Promise<AppConfig> {
+  const stored = await loadUserConfig();
+  const apiKey = env.DOT_API_KEY?.trim() || stored.apiKey?.trim();
+  const deviceId = env.DOT_DEVICE_ID?.trim() || stored.deviceId?.trim();
+  const baseUrlRaw = env.DOT_API_BASE_URL?.trim() || stored.baseUrl?.trim();
+
+  const missing: string[] = [];
+  if (!apiKey) missing.push("apiKey");
+  if (!deviceId) missing.push("deviceId");
+  if (missing.length > 0) throw new ConfigMissingError(missing);
+
   return {
-    apiKey,
-    deviceId,
-    baseUrl: env.DOT_API_BASE_URL?.trim() || undefined,
+    apiKey: apiKey!,
+    deviceId: deviceId!,
+    baseUrl: baseUrlRaw || undefined,
   };
 }
 

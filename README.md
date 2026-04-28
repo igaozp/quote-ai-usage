@@ -21,24 +21,30 @@ API Key、不模拟登录、不读浏览器 cookie。
 
 ```bash
 bun install
-cp .env.example .env                     # 填 DOT_API_KEY / DOT_DEVICE_ID
+bun link                                 # 把 quote-ai 暴露到全局 PATH
 # 把字体放到 assets/fonts/Regular.ttf 与 Bold.ttf（参考 assets/fonts/README.md）
 
-bun run preview                          # 渲染今日真实数据 → preview.png（不推送）
-bun run preview:open                     # 同上并自动打开
-bun run push                             # 渲染 + 真推送
-bun run watch                            # 守护模式，默认每 30 分钟一次
-
-bun link && quote-ai help                # 把 quote-ai 暴露到全局 PATH
+quote-ai config                          # 交互式录入 API Key / 设备 ID
+quote-ai preview                         # 仅渲染验证（不需要凭证）
+quote-ai push                            # 真推送
+quote-ai watch                           # 守护模式，默认每 30 分钟一次
 ```
+
+凭证存到 `~/.config/quote-ai-usage/config.json`（POSIX 权限 0600，Windows 落在
+`%APPDATA%\quote-ai-usage\config.json`）。如果第一次跑 `push` / `watch` 时
+还没配置，会在 TTY 中自动进入交互向导；非 TTY（如 plugin hook）则报错指引。
+
+环境变量 `DOT_API_KEY` / `DOT_DEVICE_ID` / `DOT_API_BASE_URL` 仍可使用，
+**优先级高于** 配置文件，方便临时覆盖或 CI 场景。
 
 ## 命令
 
 | 命令 | 说明 |
 |------|------|
-| `quote-ai preview [out.png] [--open]` | 仅渲染，不推送；不需要 `DOT_*` 环境变量 |
-| `quote-ai push` | 一次性：聚合今日数据 + 渲染 + 推送 |
-| `quote-ai watch [--interval=30m]` | 进程内定时器，每 N 分钟一次 |
+| `quote-ai config [--show] [--reset]` | 交互配置 / 显示当前 / 删除配置文件 |
+| `quote-ai preview [out.png] [--open]` | 仅渲染，不推送；不需要凭证 |
+| `quote-ai push [--skip-if-cooling]` | 一次性：聚合 + 渲染 + 推送（含 throttle）|
+| `quote-ai watch [--interval=30m]` | 进程内定时器 |
 | `quote-ai help` | 用法说明 |
 
 ## 与 Claude Code 集成（推荐）

@@ -18,9 +18,13 @@ Before enabling the plugin, complete the parent project setup once:
 cd <repo-root>
 bun install
 bun link                # exposes `quote-ai` in your PATH
-cp .env.example .env    # fill DOT_API_KEY / DOT_DEVICE_ID
+quote-ai config         # interactive: stores DOT_API_KEY / DOT_DEVICE_ID
 # place fonts in assets/fonts/{Regular,Bold}.ttf
 ```
+
+> The Stop hook runs without a TTY, so if you skip `quote-ai config` the
+> first invocation will exit non-zero immediately. Run it once in a real
+> terminal before enabling the plugin.
 
 Verify the CLI works (no DOT_* secrets needed):
 

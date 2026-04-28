@@ -37,7 +37,9 @@
 | `src/render.ts` | satori + resvg 平台无关渲染核心 |
 | `src/render.node.ts` | Node 端字体与 wasm 加载 |
 | `src/dot-client.ts` | Dot 图像 API 客户端 |
-| `src/config.ts` | env → AppConfig + resolveTimezone |
+| `src/config.ts` | env + 用户配置 → AppConfig（resolveAppConfig）+ resolveTimezone |
+| `src/user-config.ts` | 读写 `~/.config/quote-ai-usage/config.json`（POSIX 0600） |
+| `src/prompt.ts` | TTY 交互工具（promptText / promptHidden / promptYesNo） |
 | `src/push.ts` | collectAndPush：collect → render → push 一条龙 |
 | `src/cli.ts` | `quote-ai push` / `watch` / `preview` / `help` 入口（bun shebang）|
 | `src/index.ts` | 库式 re-exports（程序化用）|

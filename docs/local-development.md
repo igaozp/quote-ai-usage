@@ -7,7 +7,8 @@
 
 ```bash
 bun install
-cp .env.example .env       # 填 DOT_API_KEY / DOT_DEVICE_ID
+bun link                   # 把 quote-ai 注入全局 PATH
+quote-ai config            # 交互式录入 API Key / 设备 ID
 ```
 
 字体（必备，gitignored）：
@@ -19,12 +20,34 @@ assets/fonts/Bold.ttf      # weight 700
 
 详见 [`assets/fonts/README.md`](../assets/fonts/README.md)，推荐 Inter 静态字重。
 
+## 配置存储
+
+`quote-ai config` 把凭证写到：
+
+| 平台 | 路径 |
+|------|------|
+| macOS / Linux | `$XDG_CONFIG_HOME/quote-ai-usage/config.json`（默认 `~/.config/quote-ai-usage/config.json`，权限 0600）|
+| Windows | `%APPDATA%\quote-ai-usage\config.json` |
+
+`config.json` 形如：
+
+```json
+{
+  "apiKey": "...",
+  "deviceId": "...",
+  "baseUrl": "https://dot.mindreset.tech"
+}
+```
+
+也可以完全不用文件，靠环境变量驱动（CI / sandbox 场景）：环境变量 **优先级高于**
+配置文件。
+
 ## 环境变量
 
 | 变量 | 说明 | 必填 |
 |------|------|------|
-| `DOT_API_KEY` | Dot 平台 API Key（不带 `dot_app_` 前缀，客户端自动拼接）| ✅（push）|
-| `DOT_DEVICE_ID` | 设备序列号 | ✅（push）|
+| `DOT_API_KEY` | Dot 平台 API Key（不带 `dot_app_` 前缀，客户端自动拼接）| 配置文件未配时必须 |
+| `DOT_DEVICE_ID` | 设备序列号 | 配置文件未配时必须 |
 | `DOT_API_BASE_URL` | 覆盖默认 base URL | |
 | `USAGE_TIMEZONE` | IANA 时区，默认 `Asia/Shanghai` | |
 | `USAGE_INTERVAL` | watch 模式间隔，默认 `30m`（支持 `30s` / `5m` / `1h`）| |
@@ -36,6 +59,11 @@ assets/fonts/Bold.ttf      # weight 700
 ## 命令
 
 ```bash
+# 配置（首次安装 + 修改 / 查看 / 删除）
+quote-ai config                  # 交互式录入；首启会自动触发
+quote-ai config --show           # 显示当前配置（apiKey 已脱敏）
+quote-ai config --reset          # 删除配置文件
+
 # 仅本地验证：渲染今日真实数据为 PNG，不调 Dot
 bun run preview                  # 输出 preview.png
 bun run preview:open             # 输出后自动调系统默认应用打开

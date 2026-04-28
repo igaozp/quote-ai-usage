@@ -6,7 +6,7 @@ import type { DailyUsage } from "./collectors/types.js";
 import { buildUsageData } from "./aggregate.js";
 import { renderUsageCardLocal } from "./render.node.js";
 import { DotClient, pngBytesToBase64 } from "./dot-client.js";
-import { loadConfig, resolveTimezone, type EnvLike } from "./config.js";
+import { resolveAppConfig, resolveTimezone, type EnvLike } from "./config.js";
 import type { UsageData } from "./render.js";
 
 export interface PushOptions {
@@ -67,7 +67,7 @@ export async function collectAndPush(opts: PushOptions): Promise<PushResult> {
     return { data, usage, pushed: false, png };
   }
 
-  const config = loadConfig(opts.env);
+  const config = await resolveAppConfig(opts.env);
   const client = new DotClient({
     apiKey: config.apiKey,
     baseUrl: config.baseUrl,

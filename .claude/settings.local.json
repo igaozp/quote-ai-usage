@@ -27,7 +27,15 @@
       "Bash(time DOT_API_KEY=fake DOT_DEVICE_ID=fake USAGE_COOLDOWN=8s bun src/cli.ts push)",
       "Bash(wait)",
       "Bash(DOT_API_KEY=fake DOT_DEVICE_ID=fake USAGE_COOLDOWN=4s bun src/cli.ts push --skip-if-cooling)",
-      "Bash(DOT_API_KEY=fake DOT_DEVICE_ID=fake USAGE_COOLDOWN=4s bun src/cli.ts push)"
+      "Bash(DOT_API_KEY=fake DOT_DEVICE_ID=fake USAGE_COOLDOWN=4s bun src/cli.ts push)",
+      "Bash(rm -rf ~/.config/quote-ai-usage)",
+      "Bash(bun src/cli.ts config --show)",
+      "Bash(DOT_API_KEY= DOT_DEVICE_ID= bun src/cli.ts push)",
+      "Bash(grep -E '\\\\\\\\\\\\\\\\b|\\\\\\\\\\\\\\\\n|003|004|177')",
+      "Bash(bun -e 'import { saveUserConfig } from \"./src/user-config.ts\"; const p = await saveUserConfig\\({ apiKey: \"sk-test-1234567890abcdef\", deviceId: \"DEV-XYZ\" }\\); console.log\\(\"saved:\", p\\);')",
+      "Bash(bun src/cli.ts push --skip-if-cooling --cooldown=0)",
+      "Bash(bun src/cli.ts config --reset)",
+      "Bash(bun src/cli.ts push)"
     ]
   }
 }

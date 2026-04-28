@@ -49,9 +49,23 @@ Codex 的 token 总数与 `primary.usedPercent`，**不要**给 Codex 加 USD �
 - 字体只接受静态 TTF，命名固定为 `assets/fonts/Regular.ttf` / `Bold.ttf`
 - 改尺寸要同步改 `render.ts` 的 `CARD_WIDTH/HEIGHT` 与 Dot API 推送参数
 
+## 配置读取
+
+- `src/config.ts` 的 `resolveAppConfig(env)` 是**异步**的，先读环境变量，
+  再回退到 `~/.config/quote-ai-usage/config.json`（Windows 在 `%APPDATA%\…`）。
+  缺则抛 `ConfigMissingError`
+- 配置文件读写在 `src/user-config.ts`，CLI 通过 `quote-ai config` 子命令
+  录入；写入会做 `chmod 0600`（POSIX），Windows 上 chmod 调用静默失败
+- 优先级：env > 配置文件。CI / 临时覆盖只设环境变量即可
+- 首启策略：`push` / `watch` 启动时缺配置 → TTY 自动进入向导；非 TTY（plugin
+  hook 等）报错退出，**不**阻塞调用方
+- 隐藏输入实现在 `src/prompt.ts`，使用 raw-mode + 字符级 echo `*`，不依赖
+  外部库；非 TTY 时 fallback 到普通 readline
+- 不要把任何 secret commit 进仓库；配置文件本身在用户 HOME 目录而非项目内
+
 ## CLI 入口
 
-- `src/cli.ts` 命令：`push` / `watch` / `preview` / `help`
+- `src/cli.ts` 命令：`config` / `push` / `watch` / `preview` / `help`
 - `bun link` 后 `quote-ai` 在全局 PATH，shebang 自动找 `bun`
 - `src/push.ts` 的 `collectAndPush(opts)` 是程序化入口，被 cli、index re-export
 - 失败信息一律打 stderr 并返回非 0；不要 swallow 错误（plugin hook 会忽略
