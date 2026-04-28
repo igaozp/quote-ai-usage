@@ -1,31 +1,36 @@
 {
   "name": "quote-ai-usage",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Aggregate Claude Code & Codex CLI today's token usage and push as a 296x152 PNG to a Dot device",
   "type": "module",
   "bin": {
-    "quote-ai": "./bin/quote-ai.mjs"
+    "quote-ai": "./src/cli.ts"
   },
+  "files": [
+    "src",
+    "assets/fonts/README.md",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "push": "tsx src/cli.ts push",
-    "watch": "tsx src/cli.ts watch",
-    "preview": "tsx src/cli.ts preview",
-    "preview:open": "tsx src/cli.ts preview --open",
-    "dev": "tsx src/cli.ts push",
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "push": "bun src/cli.ts push",
+    "watch": "bun src/cli.ts watch",
+    "preview": "bun src/cli.ts preview",
+    "preview:open": "bun src/cli.ts preview --open",
+    "build": "bun build src/cli.ts --target=bun --outdir dist --minify",
+    "build:bin": "bun build src/cli.ts --compile --outfile dist/quote-ai",
+    "typecheck": "bunx tsc -p tsconfig.json --noEmit"
   },
   "engines": {
-    "node": ">=18"
+    "bun": ">=1.1"
   },
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",
-    "satori": "^0.26.0",
-    "tsx": "^4.19.2"
+    "satori": "^0.26.0"
   },
   "devDependencies": {
-    "@types/node": "^22.10.0",
+    "@types/bun": "^1.3.0",
     "typescript": "^5.7.2"
   }
 }

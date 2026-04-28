@@ -1,7 +1,10 @@
-#!/usr/bin/env node
-import { argv, env, exit } from "node:process";
+#!/usr/bin/env bun
+import { argv, env as rawEnv, exit } from "node:process";
 import { resolve } from "node:path";
 import { collectAndPush } from "./push.js";
+import type { EnvLike } from "./config.js";
+
+const env = rawEnv as EnvLike & Record<string, string | undefined>;
 
 type Cmd = "push" | "watch" | "preview" | "help";
 

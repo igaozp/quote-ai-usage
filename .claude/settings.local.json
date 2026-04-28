@@ -14,7 +14,12 @@
       "Bash(node -e 'console.log\\(require.resolve\\(\"tsx/cli\"\\)\\)')",
       "Bash(DEBUG_PNG=preview.png node bin/quote-ai.mjs push --dry-run)",
       "Bash(git restore *)",
-      "Bash(node bin/quote-ai.mjs preview ./preview.png)"
+      "Bash(node bin/quote-ai.mjs preview ./preview.png)",
+      "Bash(bun --version)",
+      "Bash(bun install *)",
+      "Bash(bun run *)",
+      "Bash(bun src/cli.ts preview ./preview.png)",
+      "Bash(bun src/cli.ts help)"
     ]
   }
 }

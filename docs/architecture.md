@@ -39,9 +39,8 @@
 | `src/dot-client.ts` | Dot 图像 API 客户端 |
 | `src/config.ts` | env → AppConfig + resolveTimezone |
 | `src/push.ts` | collectAndPush：collect → render → push 一条龙 |
-| `src/cli.ts` | `quote-ai push` / `watch` / `help` 入口 |
+| `src/cli.ts` | `quote-ai push` / `watch` / `preview` / `help` 入口（bun shebang）|
 | `src/index.ts` | 库式 re-exports（程序化用）|
-| `bin/quote-ai.mjs` | npm bin wrapper：用 tsx 跑 src/cli.ts |
 | `plugin/claude-code/` | Claude Code 插件（hook + command）|
 | `assets/fonts/` | Regular.ttf / Bold.ttf（gitignored）|
 

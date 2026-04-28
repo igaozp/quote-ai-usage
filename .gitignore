@@ -6,6 +6,10 @@ dist/
 .DS_Store
 preview.png
 
+# Bun produces these — bun.lock is committed (lockfile), but caches are not
+.bun/
+bun-debug.log*
+
 # Fonts must be supplied per-environment (license / size)
 assets/fonts/*.ttf
 assets/fonts/*.otf

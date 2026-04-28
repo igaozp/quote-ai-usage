@@ -9,6 +9,17 @@
 渲染成 296×152 PNG 推到 quote/0 设备。**纯本地运行**，不再支持
 Cloudflare Workers。
 
+## 工具链是 bun，不是 npm
+
+- 运行时与包管理器都是 `bun`（>=1.1）
+- 直接 `bun src/cli.ts` 跑 TypeScript，没有 tsx / ts-node，也没有 dist
+- 命令对应：`npm install` → `bun install`；`npm run X` → `bun run X` 或
+  `bun X`；`npm link` → `bun link`；`npm uninstall` → `bun remove`
+- typecheck 走 `bun run typecheck`（内部 `bunx tsc --noEmit`）
+- 类型 = `@types/bun`（**不要**加 `@types/node`，会与 bun-types 冲突）
+- bin 直接指向 `./src/cli.ts`，shebang `#!/usr/bin/env bun`；不要再写
+  Node wrapper
+
 ## 数据源是只读 JSONL，不调任何 LLM 平台 API
 
 - `~/.claude/projects/<slug>/<sessionId>.jsonl`：解析 `message.usage` +
@@ -38,11 +49,10 @@ Codex 的 token 总数与 `primary.usedPercent`，**不要**给 Codex 加 USD �
 - 字体只接受静态 TTF，命名固定为 `assets/fonts/Regular.ttf` / `Bold.ttf`
 - 改尺寸要同步改 `render.ts` 的 `CARD_WIDTH/HEIGHT` 与 Dot API 推送参数
 
-## CLI 与入口
+## CLI 入口
 
-- `bin/quote-ai.mjs` 是 npm bin 入口（spawn tsx 跑 src/cli.ts）。
-  npm link 之后 `quote-ai` 在全局 PATH
-- `src/cli.ts` 命令：`push` / `watch` / `help`
+- `src/cli.ts` 命令：`push` / `watch` / `preview` / `help`
+- `bun link` 后 `quote-ai` 在全局 PATH，shebang 自动找 `bun`
 - `src/push.ts` 的 `collectAndPush(opts)` 是程序化入口，被 cli、index re-export
 - 失败信息一律打 stderr 并返回非 0；不要 swallow 错误（plugin hook 会忽略
   非 0 退出）
@@ -52,7 +62,14 @@ Codex 的 token 总数与 `primary.usedPercent`，**不要**给 Codex 加 USD �
 - `plugin/claude-code/` 是 Claude Code 插件
 - `hooks/hooks.json` 配 `Stop` 触发 `quote-ai push`，30s timeout
 - `commands/push-usage.md` 是手动 slash command
-- 插件假定 `quote-ai` 已经 `npm link`；不要在 plugin 里 hard-code 仓库路径
+- 插件假定 `quote-ai` 已经 `bun link`；不要在 plugin 里 hard-code 仓库路径
+
+## 打包
+
+- `bun run build` → `dist/cli.js`（minified，bun runtime 跑）
+- `bun run build:bin` → `dist/quote-ai{.exe}`（`bun build --compile` 产生
+  的 standalone 可执行，包含运行时）
+- 日常开发不需要 build；build 是为了在没装 bun 的机器上分发
 
 ## Dot API 调用约定
 
@@ -65,6 +82,7 @@ Codex 的 token 总数与 `primary.usedPercent`，**不要**给 Codex 加 USD �
 ## 不要做的事
 
 - 不要恢复 Cloudflare Workers 路径，`worker.ts` / `wrangler.toml` 已删除
+- 不要回退到 npm / tsx 工具链
 - 不要把 LLM 平台 API Key（Anthropic / OpenAI）引入仓库（不需要）
 - 不要给 Codex token 算 USD
 - 不要在 satori 树里用非 flex 布局或 variable font

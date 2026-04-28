@@ -13,17 +13,21 @@ Before enabling the plugin, complete the parent project setup once:
 
 ```bash
 cd <repo-root>
-npm install
-npm link              # exposes `quote-ai` in your PATH
-cp .env.example .env  # fill DOT_API_KEY / DOT_DEVICE_ID
+bun install
+bun link                # exposes `quote-ai` in your PATH
+cp .env.example .env    # fill DOT_API_KEY / DOT_DEVICE_ID
 # place fonts in assets/fonts/{Regular,Bold}.ttf
 ```
 
-Verify the CLI works:
+Verify the CLI works (no DOT_* secrets needed):
 
 ```bash
-quote-ai push --dry-run
+quote-ai preview
 ```
+
+> The `quote-ai` shebang is `#!/usr/bin/env bun`, so `bun` must resolve on
+> PATH. To deploy without a global bun install, run `bun run build:bin` and
+> point the plugin at the resulting `dist/quote-ai` binary instead.
 
 ## Install the plugin
 

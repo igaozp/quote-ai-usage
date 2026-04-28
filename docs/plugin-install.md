@@ -9,12 +9,16 @@ Code 在每次会话结束后自动调一次 `quote-ai push`，无需任何外�
 
 ```bash
 cd <repo-root>
-npm install
-npm link                           # 让 quote-ai 进入全局 PATH
+bun install
+bun link                           # 让 quote-ai 进入全局 PATH
 cp .env.example .env               # 填 DOT_API_KEY / DOT_DEVICE_ID
 # assets/fonts/{Regular,Bold}.ttf   按 README 放好字体
-quote-ai push --dry-run            # 验证整条链路
+quote-ai preview                   # 验证整条链路（不需要 DOT_*）
 ```
+
+> shebang 用 `#!/usr/bin/env bun`，所以目标机器的 PATH 必须能找到 `bun`。
+> 如果不想全局装 bun，跑 `bun run build:bin` 把 `dist/quote-ai` 二进制产出
+> 后链入 PATH 也行（自带 runtime）。
 
 ## 安装
 
