@@ -1,76 +1,58 @@
 # 架构
 
-## 分层
+## 数据流
 
 ```
-┌────────────────────────────┐  ┌────────────────────────────┐
-│  src/index.ts              │  │  src/worker.ts             │
-│  Node 入口                  │  │  Workers 入口               │
-│  (process.env, fs, argv)   │  │  (fetch / scheduled, env)  │
-└──────────┬─────────────────┘  └──────────┬─────────────────┘
-           │                                │
-           ▼                                ▼
-┌────────────────────────────┐  ┌────────────────────────────┐
-│  src/render.node.ts        │  │  src/render.worker.ts      │
-│  - fs.readFile 读字体/wasm  │  │  - import *.ttf / *.wasm    │
-│  - require.resolve         │  │  - wrangler bundler 处理     │
-└──────────┬─────────────────┘  └──────────┬─────────────────┘
-           │                                │
-           └──────────────┬─────────────────┘
-                          ▼
-        ┌────────────────────────────────────┐
-        │  src/render.ts (平台无关)           │
-        │  - satori(树) → SVG                 │
-        │  - Resvg(SVG) → PNG (Uint8Array)    │
-        │  - ensureResvgInit() 单例 wasm 初始化│
-        └──────────────┬─────────────────────┘
-                       ▼
-        ┌────────────────────────────────────┐
-        │  src/dot-client.ts                 │
-        │  - DotClient.pushImage(deviceId,…) │
-        │  - pngBytesToBase64 (纯 btoa)       │
-        │  - DotApiError                     │
-        └──────────────┬─────────────────────┘
-                       ▼
-              Dot Open Image API
-        https://dot.mindreset.tech
+~/.claude/projects/**.jsonl ──┐
+                              ├──> collectors/{claude,codex}.ts
+~/.codex/sessions/**.jsonl  ──┘            │
+                                           ▼
+                                 collectors/types.DailyUsage
+                                           │
+                                           ▼
+                                  aggregate.buildUsageData()
+                                           │
+                                           ▼
+                                    render.UsageData
+                                           │
+                          satori → SVG → resvg-wasm → PNG
+                                           │
+                                           ▼
+                                  dot-client.pushImage()
+                                           │
+                                           ▼
+                                  https://dot.mindreset.tech
 ```
 
-## 核心设计原则
+## 文件分工
 
-1. **平台无关代码做主体**：`render.ts` / `dot-client.ts` / `config.ts` /
-   `types.ts` 都只依赖 Web 标准（`fetch`、`btoa`、`ArrayBuffer`、
-   `WebAssembly`），Node 与 Workers 都能直接使用。
-2. **平台差异隔离在适配器**：`render.node.ts`（fs / require）和
-   `render.worker.ts`（binary import）是仅有的两个平台特定文件。新增运行环境时
-   只需新增一个适配器。
-3. **二进制资源同源**：字体文件统一放在 `assets/fonts/`，Node 端走 `fs.readFile`，
-   Workers 端走 `import` 由 wrangler 打包；wasm 通过 `scripts/copy-wasm.mjs`
-   vendored 到 `src/vendor/`，避免跨 `node_modules` 边界 import。
-4. **类型一致**：`RenderFont.data` 收紧为 `ArrayBuffer`，两端都拷贝/产出独立
-   ArrayBuffer，避免 Node `Buffer` 类型污染 Worker tsconfig。
-5. **配置一处定义**：`loadConfig(env)` 接收任意 env-shaped 对象（`process.env`
-   或 Workers `env` 绑定），返回相同 `AppConfig`。
+| 路径 | 角色 |
+|------|------|
+| `src/collectors/types.ts` | DailyUsage / ClaudeMetric / CodexMetric 类型 |
+| `src/collectors/util.ts` | tz-aware 日期工具（dateInTz、utcPathParts）|
+| `src/collectors/pricing.ts` | 模型 → 单价表 + estimateUsd |
+| `src/collectors/claude.ts` | 扫 `~/.claude/projects/**/*.jsonl` |
+| `src/collectors/codex.ts` | 扫 `~/.codex/sessions/<UTC>/*.jsonl` |
+| `src/aggregate.ts` | DailyUsage → UsageData（卡片字段）|
+| `src/render.ts` | satori + resvg 平台无关渲染核心 |
+| `src/render.node.ts` | Node 端字体与 wasm 加载 |
+| `src/dot-client.ts` | Dot 图像 API 客户端 |
+| `src/config.ts` | env → AppConfig + resolveTimezone |
+| `src/push.ts` | collectAndPush：collect → render → push 一条龙 |
+| `src/cli.ts` | `quote-ai push` / `watch` / `help` 入口 |
+| `src/index.ts` | 库式 re-exports（程序化用）|
+| `bin/quote-ai.mjs` | npm bin wrapper：用 tsx 跑 src/cli.ts |
+| `plugin/claude-code/` | Claude Code 插件（hook + command）|
+| `assets/fonts/` | Regular.ttf / Bold.ttf（gitignored）|
 
-## 文件清单
+## 设计原则
 
-| 路径 | 角色 | 平台 |
-|------|------|------|
-| `src/types.ts` | Dot API 请求/响应类型 | 双端 |
-| `src/dot-client.ts` | Dot API 客户端 + base64 编码 | 双端 |
-| `src/config.ts` | env → AppConfig | 双端 |
-| `src/render.ts` | satori + resvg 渲染核心 | 双端 |
-| `src/render.node.ts` | Node 资源加载适配 | Node |
-| `src/render.worker.ts` | Workers 资源加载适配 | Workers |
-| `src/index.ts` | Node CLI 入口 | Node |
-| `src/worker.ts` | Workers 入口 (fetch + scheduled) | Workers |
-| `src/worker-assets.d.ts` | `*.wasm` / `*.ttf` 模块声明 | Workers |
-| `src/vendor/resvg.wasm` | postinstall 复制的 wasm（gitignored）| 双端可用 |
-| `assets/fonts/Regular.ttf` | 体重 400 的字体（gitignored）| 双端 |
-| `assets/fonts/Bold.ttf` | 体重 700 的字体（gitignored）| 双端 |
-| `scripts/copy-wasm.mjs` | postinstall 钩子：复制 resvg wasm | build-time |
-| `wrangler.toml` | Workers 部署配置 | Workers |
-| `tsconfig.json` | TypeScript solution 入口（references）| build-time |
-| `tsconfig.base.json` | 共享 compilerOptions | build-time |
-| `tsconfig.node.json` | Node 代码 typecheck | build-time |
-| `tsconfig.worker.json` | Worker 代码 typecheck | build-time |
+1. **数据收集与渲染分离**：collectors 只产出统一的 `DailyUsage`，不关心怎么
+   渲染；`aggregate.ts` 决定卡片放哪些字段；`render.ts` 不知道数据从哪来。
+2. **时区显式**：所有"今天"判定都走 `dateInTz()` 字符串比较，避免 epoch
+   边界算错；tz 默认 `Asia/Shanghai`，用户可通过 `USAGE_TIMEZONE` 覆盖。
+3. **Codex Plus 不算钱**：套餐配额型用户没有 token-USD 映射，强行换算只会
+   误导，所以只展示 token 与配额%。
+4. **失败可观察**：collectors 都包了 try/catch，异常打到 stderr，不阻塞另一
+   端的采集与推送（一边坏不影响另一边）。
+5. **单一 tsconfig**：双端兼容设计已撤回，只面向 Node。

@@ -1,0 +1,51 @@
+# quote-ai-usage — Claude Code plugin
+
+This directory is the Claude Code plugin entry for the parent project. It
+exposes:
+
+- **Stop hook** — runs `quote-ai push` after every Claude Code turn so the
+  Dot device reflects fresh token usage with no manual action.
+- **`/push-usage` slash command** — manually trigger one push.
+
+## Prerequisites
+
+Before enabling the plugin, complete the parent project setup once:
+
+```bash
+cd <repo-root>
+npm install
+npm link              # exposes `quote-ai` in your PATH
+cp .env.example .env  # fill DOT_API_KEY / DOT_DEVICE_ID
+# place fonts in assets/fonts/{Regular,Bold}.ttf
+```
+
+Verify the CLI works:
+
+```bash
+quote-ai push --dry-run
+```
+
+## Install the plugin
+
+Symlink (or copy) this directory into `~/.claude/plugins/`:
+
+```bash
+# macOS / Linux
+ln -s "$(pwd)/plugin/claude-code" "$HOME/.claude/plugins/quote-ai-usage"
+
+# Windows (admin powershell)
+New-Item -ItemType SymbolicLink `
+  -Path "$env:USERPROFILE\.claude\plugins\quote-ai-usage" `
+  -Target "$PWD\plugin\claude-code"
+```
+
+Restart Claude Code, then confirm:
+
+- `/plugin` list shows `quote-ai-usage`
+- `/push-usage` triggers a manual push
+- After your next Claude turn finishes, the device updates automatically
+
+## Disabling
+
+Remove the symlink in `~/.claude/plugins/quote-ai-usage`, or use the
+`/plugin disable quote-ai-usage` command.

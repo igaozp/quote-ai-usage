@@ -1,30 +1,30 @@
 {
   "name": "quote-ai-usage",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Push LLM AI usage as images to quote/0 device via Dot API",
+  "description": "Aggregate Claude Code & Codex CLI today's token usage and push as a 296x152 PNG to a Dot device",
   "type": "module",
+  "bin": {
+    "quote-ai": "./bin/quote-ai.mjs"
+  },
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "preview": "DEBUG_PNG=preview.png tsx src/index.ts --dry-run",
-    "build": "tsc -p tsconfig.node.json",
-    "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.worker.json --noEmit",
-    "postinstall": "node scripts/copy-wasm.mjs",
-    "worker:dev": "wrangler dev",
-    "worker:deploy": "wrangler deploy"
+    "push": "tsx src/cli.ts push",
+    "watch": "tsx src/cli.ts watch",
+    "preview": "DEBUG_PNG=preview.png tsx src/cli.ts push --dry-run",
+    "dev": "tsx src/cli.ts push",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "engines": {
     "node": ">=18"
   },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260426.1",
-    "@types/node": "^22.10.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
-    "wrangler": "^4.85.0"
-  },
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",
-    "satori": "^0.26.0"
+    "satori": "^0.26.0",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
   }
 }

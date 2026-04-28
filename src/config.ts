@@ -8,12 +8,14 @@ export interface EnvLike {
   DOT_API_KEY?: string;
   DOT_DEVICE_ID?: string;
   DOT_API_BASE_URL?: string;
+  USAGE_TIMEZONE?: string;
+  USAGE_INTERVAL?: string;
+  CLAUDE_HOME?: string;
+  CODEX_HOME?: string;
+  DEBUG_PNG?: string;
+  QUOTE_AI_CACHE?: string;
 }
 
-/**
- * Build config from any env-shaped object (process.env locally,
- * the Workers env binding in Cloudflare).
- */
 export function loadConfig(env: EnvLike): AppConfig {
   const apiKey = env.DOT_API_KEY?.trim();
   const deviceId = env.DOT_DEVICE_ID?.trim();
@@ -24,4 +26,8 @@ export function loadConfig(env: EnvLike): AppConfig {
     deviceId,
     baseUrl: env.DOT_API_BASE_URL?.trim() || undefined,
   };
+}
+
+export function resolveTimezone(env: EnvLike): string {
+  return env.USAGE_TIMEZONE?.trim() || "Asia/Shanghai";
 }

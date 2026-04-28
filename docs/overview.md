@@ -2,18 +2,34 @@
 
 ## 目标
 
-将 LLM AI 的 usage 信息（消费金额、token 用量、调用次数等）以 **296×152 PNG**
-图片的形式，通过 **Dot 官方开放 API** 定时推送到 quote/0 设备屏幕。同一份代码同
-时支持本地 Node 运行与 Cloudflare Workers 部署，部署侧通过 cron triggers 实现定
-时推送。
+把"今日"个人 **Claude Code** 与 **Codex CLI** 的 token 用量聚合后渲染成
+296×152 PNG，通过 [Dot 开放 API](https://dot.mindreset.tech) 推送到 quote/0
+设备屏幕，让你不打开任何官网就能在桌面物件上看到当天烧了多少。
+
+## 数据源
+
+完全本地，从两家 CLI 自行落盘的 JSONL 中读取：
+
+- `~/.claude/projects/<slug>/<sessionId>.jsonl` —— Claude Code 每次 assistant
+  响应的 `message.usage`（input / output / cache_creation / cache_read tokens
+  + 模型名）。按公开单价表估算 USD。
+- `~/.codex/sessions/<YYYY>/<MM>/<DD>/rollout-…jsonl` —— Codex CLI 的
+  `event_msg.token_count` 累积 token 与 `rate_limits` 套餐使用率。Codex Plus
+  按 5h / 周窗口配额，**不按 token 计费**，所以只展示 token 数与配额%，不算
+  USD。
 
 ## 当前进度
 
-- [x] Dot 图像 API 对接（POST /api/authV2/open/device/:deviceId/image）
-- [x] 基础渲染管线：satori → SVG → resvg-wasm → PNG
-- [x] 本地 Node 入口（读环境变量 + 推送 / 预览）
-- [x] Cloudflare Workers 入口（fetch + scheduled）
-- [x] 双端共享代码 + 平台适配器隔离
-- [ ] 真实 usage 数据源接入（Anthropic / OpenAI）
-- [ ] 渲染模板与配色对实际 e-paper dither 效果的视觉调优
-- [ ] 错误重试 / 限流 / 监控
+- [x] Dot 图像 API 对接
+- [x] satori + resvg-wasm 渲染 296×152 PNG
+- [x] Claude Code 与 Codex CLI 本地 JSONL 收集器
+- [x] 单进程 CLI（`quote-ai push` 一次性 / `quote-ai watch` 守护）
+- [x] Claude Code Plugin（Stop hook + `/push-usage` 命令）
+- [ ] 持久化增量游标（每次只读追加部分）
+- [ ] 多模板（按模型 / 按窗口）切换
+- [ ] 重试与静默失败上报
+
+## 部署形态
+
+只有"本地"。Cloudflare Workers 路线已经不适用此需求（Workers 没法读用户机器
+上的 JSONL）。Workers 相关代码已从仓库移除。

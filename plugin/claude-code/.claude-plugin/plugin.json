@@ -1,0 +1,8 @@
+{
+  "name": "quote-ai-usage",
+  "version": "0.2.0",
+  "description": "Push today's Claude Code & Codex CLI token usage to a Dot device after each Claude turn.",
+  "author": {
+    "name": "igaozp"
+  }
+}

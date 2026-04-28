@@ -1,0 +1,14 @@
+{
+  "Stop": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "quote-ai push",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
+}
