@@ -52,17 +52,21 @@ export async function promptHidden(message: string): Promise<string> {
     stdin.setRawMode!(true);
     stdin.resume();
     let buf = "";
+    const cleanup = () => {
+      stdin.setRawMode?.(false);
+      stdin.pause();
+      stdin.removeListener("data", onData);
+    };
     const onData = (data: Buffer) => {
       for (const code of data) {
         if (code === CR || code === LF || code === EOT) {
-          stdin.setRawMode?.(false);
-          stdin.pause();
-          stdin.removeListener("data", onData);
+          cleanup();
           stdout.write("\n");
           resolve(buf.trim());
           return;
         }
         if (code === ETX) {
+          cleanup();
           stdout.write("\n");
           process.exit(130);
         }

@@ -35,7 +35,11 @@
       "Bash(bun -e 'import { saveUserConfig } from \"./src/user-config.ts\"; const p = await saveUserConfig\\({ apiKey: \"sk-test-1234567890abcdef\", deviceId: \"DEV-XYZ\" }\\); console.log\\(\"saved:\", p\\);')",
       "Bash(bun src/cli.ts push --skip-if-cooling --cooldown=0)",
       "Bash(bun src/cli.ts config --reset)",
-      "Bash(bun src/cli.ts push)"
+      "Bash(bun src/cli.ts push)",
+      "Bash(sort -u echo '---system rows---' grep -h '\"type\":\"system\"' ~/.claude/projects/C--Users-igaozp-project-quote-ai-usage/*.jsonl)",
+      "Bash(bun -e ' *)",
+      "Bash(bun -e 'import { readFile } from \"node:fs/promises\"; import { homedir } from \"node:os\"; import { join } from \"node:path\"; *)",
+      "Bash(bun src/cli.ts preview)"
     ]
   }
 }
