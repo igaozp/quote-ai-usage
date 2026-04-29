@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   ensureResvgInit,
   renderUsageCard,
+  type ColorMode,
   type UsageData,
 } from "./render.js";
 
@@ -56,6 +57,7 @@ async function loadFonts() {
 
 export async function renderUsageCardLocal(
   data: UsageData,
+  mode?: ColorMode,
 ): Promise<Uint8Array> {
   await initOnce();
   const { regular, bold } = await loadFonts();
@@ -64,5 +66,6 @@ export async function renderUsageCardLocal(
       { name: "UI", data: regular, weight: 400 },
       { name: "UI", data: bold, weight: 700 },
     ],
+    mode,
   });
 }

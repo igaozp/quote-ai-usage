@@ -8,6 +8,7 @@ import {
   ConfigMissingError,
   type EnvLike,
 } from "./config.js";
+import type { ColorMode } from "./render.js";
 import {
   deleteUserConfig,
   loadUserConfig,
@@ -37,6 +38,13 @@ interface Args {
   open: boolean;
   show: boolean;
   reset: boolean;
+  theme?: ColorMode;
+}
+
+function parseTheme(raw: string | undefined): ColorMode | undefined {
+  if (raw === undefined) return undefined;
+  if (raw === "light" || raw === "dark") return raw;
+  throw new Error(`Bad --theme value: ${raw} (expected light|dark)`);
 }
 
 const VALID_CMDS: Cmd[] = ["push", "watch", "preview", "config", "help"];
@@ -86,6 +94,7 @@ function parseArgs(rawArgv: string[]): Args {
     open: flat.includes("--open"),
     show: flat.includes("--show"),
     reset: flat.includes("--reset"),
+    theme: parseTheme(pickFlag(flat, "--theme=")),
   };
 }
 
@@ -99,7 +108,8 @@ function printHelp() {
       "  quote-ai push [--dry-run] [--cooldown=60s] [--skip-if-cooling]",
       "                                                collect + render + push (throttled)",
       "  quote-ai watch [--interval=30m] [--dry-run]   loop in-process",
-      "  quote-ai preview [out.png] [--open]           render only; no Dot call",
+      "  quote-ai preview [out.png] [--open] [--theme=light|dark]",
+      "                                                render only; no Dot call",
       "  quote-ai help",
       "",
       "First-run flow:",
@@ -110,6 +120,7 @@ function printHelp() {
       "Env (override on-disk config when set):",
       "  DOT_API_KEY, DOT_DEVICE_ID, DOT_API_BASE_URL",
       "  USAGE_TIMEZONE                default Asia/Shanghai",
+      "  USAGE_THEME                   light|dark; default light",
       "  USAGE_INTERVAL                default 30m (watch mode)",
       "  USAGE_COOLDOWN                default 60s; min seconds between pushes; 0 disables",
       "  CLAUDE_HOME, CODEX_HOME       override ~/.claude, ~/.codex",
@@ -162,9 +173,13 @@ async function pushOnce(
   }
 }
 
-async function preview(out: string, openAfter: boolean): Promise<void> {
+async function preview(
+  out: string,
+  openAfter: boolean,
+  theme: ColorMode | undefined,
+): Promise<void> {
   const absolute = resolve(out);
-  await collectAndPush({ env, dryRun: true, debugPng: absolute });
+  await collectAndPush({ env, dryRun: true, debugPng: absolute, theme });
   console.log(`[preview] PNG written: ${absolute}`);
   if (openAfter) await openInOs(absolute);
 }
@@ -188,6 +203,7 @@ function showStored(stored: StoredConfig): void {
   );
   console.log(`  deviceId: ${stored.deviceId ?? "(not set)"}`);
   console.log(`  baseUrl:  ${stored.baseUrl ?? "(default)"}`);
+  console.log(`  theme:    ${stored.theme ?? "(default light)"}`);
 }
 
 async function configCmd(args: Args): Promise<void> {
@@ -258,7 +274,20 @@ async function runWizard(_opts: WizardOpts): Promise<void> {
     baseUrl = answer || existing.baseUrl;
   }
 
-  const path = await saveUserConfig({ apiKey, deviceId, baseUrl });
+  const themeDefault: ColorMode = existing.theme ?? "light";
+  let theme: ColorMode = themeDefault;
+  while (true) {
+    const answer = (await promptText("Color mode (light/dark)", themeDefault))
+      .trim()
+      .toLowerCase();
+    if (answer === "light" || answer === "dark") {
+      theme = answer;
+      break;
+    }
+    console.error(`[config] invalid theme: ${answer}; please type light or dark.`);
+  }
+
+  const path = await saveUserConfig({ apiKey, deviceId, baseUrl, theme });
   console.log(`[config] saved → ${path}`);
 }
 
@@ -298,7 +327,7 @@ async function main(): Promise<void> {
 
   if (args.cmd === "preview") {
     // Preview never touches Dot — no config needed.
-    await preview(args.out ?? "preview.png", args.open);
+    await preview(args.out ?? "preview.png", args.open, args.theme);
     return;
   }
 

@@ -6,14 +6,22 @@ import type { DailyUsage } from "./collectors/types.js";
 import { buildUsageData } from "./aggregate.js";
 import { renderUsageCardLocal } from "./render.node.js";
 import { DotClient, pngBytesToBase64 } from "./dot-client.js";
-import { resolveAppConfig, resolveTimezone, type EnvLike } from "./config.js";
-import type { UsageData } from "./render.js";
+import {
+  resolveAppConfig,
+  resolveTheme,
+  resolveTimezone,
+  type EnvLike,
+} from "./config.js";
+import { loadUserConfig } from "./user-config.js";
+import type { ColorMode, UsageData } from "./render.js";
 
 export interface PushOptions {
   env: EnvLike;
   dryRun?: boolean;
   debugPng?: string;
   date?: Date;
+  /** Override the resolved theme (light|dark). Wins over env / file. */
+  theme?: ColorMode;
 }
 
 export interface PushResult {
@@ -53,7 +61,12 @@ export async function collectAndPush(opts: PushOptions): Promise<PushResult> {
     codex,
   };
   const data = buildUsageData(usage);
-  const png = await renderUsageCardLocal(data);
+
+  // Theme is resolved separately from credentials so dryRun/preview works
+  // even when apiKey / deviceId are missing.
+  const theme =
+    opts.theme ?? resolveTheme(opts.env, await loadUserConfig());
+  const png = await renderUsageCardLocal(data, theme);
 
   if (opts.debugPng) {
     await writeFile(opts.debugPng, png);
@@ -75,7 +88,7 @@ export async function collectAndPush(opts: PushOptions): Promise<PushResult> {
   const res = await client.pushImage(config.deviceId, {
     image: pngBytesToBase64(png),
     refreshNow: true,
-    border: 0,
+    border: theme === "dark" ? 1 : 0,
     ditherType: "DIFFUSION",
     ditherKernel: "FLOYD_STEINBERG",
   });

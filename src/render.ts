@@ -4,6 +4,18 @@ import { Resvg, initWasm } from "@resvg/resvg-wasm";
 export const CARD_WIDTH = 296;
 export const CARD_HEIGHT = 152;
 
+export type ColorMode = "light" | "dark";
+
+export interface Theme {
+  fg: string;
+  bg: string;
+}
+
+export const THEMES: Record<ColorMode, Theme> = {
+  light: { fg: "black", bg: "white" },
+  dark: { fg: "white", bg: "black" },
+};
+
 export interface CardRow {
   /** Left label (e.g. "CLAUDE", "CODEX") */
   label: string;
@@ -31,6 +43,7 @@ export interface RenderFont {
 
 export interface RenderOptions {
   fonts: RenderFont[];
+  mode?: ColorMode;
 }
 
 let resvgReady = false;
@@ -47,7 +60,8 @@ export async function renderUsageCard(
   data: UsageData,
   options: RenderOptions,
 ): Promise<Uint8Array> {
-  const svg = await satori(buildTree(data) as never, {
+  const theme = THEMES[options.mode ?? "light"];
+  const svg = await satori(buildTree(data, theme) as never, {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     fonts: options.fonts.map((f) => ({
@@ -59,7 +73,7 @@ export async function renderUsageCard(
   });
 
   const png = new Resvg(svg, {
-    background: "white",
+    background: theme.bg,
     fitTo: { mode: "width", value: CARD_WIDTH },
   })
     .render()
@@ -96,15 +110,15 @@ const BAR_WIDTH = 150;
 const BAR_HEIGHT = 10;
 const BAR_BORDER = 2;
 
-function buildTree(data: UsageData): Node {
+function buildTree(data: UsageData, theme: Theme): Node {
   return div(
     {
       display: "flex",
       flexDirection: "column",
       width: "100%",
       height: "100%",
-      backgroundColor: "white",
-      color: "black",
+      backgroundColor: theme.bg,
+      color: theme.fg,
       fontFamily: "UI",
     },
     [
@@ -128,19 +142,19 @@ function buildTree(data: UsageData): Node {
           gap: CARD_GAP,
           flex: 1,
         },
-        data.rows.map(renderCard),
+        data.rows.map((row) => renderCard(row, theme)),
       ),
     ],
   );
 }
 
-function renderCard(row: CardRow): Node {
+function renderCard(row: CardRow, theme: Theme): Node {
   return div(
     {
       display: "flex",
       flexDirection: "column",
       flex: 1,
-      border: "1px solid black",
+      border: `1px solid ${theme.fg}`,
       padding: "5px 8px",
       justifyContent: "space-between",
     },
@@ -184,7 +198,7 @@ function renderCard(row: CardRow): Node {
         },
         compact([
           row.progressPct != null
-            ? renderProgressBar(row.progressPct)
+            ? renderProgressBar(row.progressPct, theme)
             : row.secondary
               ? div(
                   {
@@ -212,7 +226,7 @@ function renderCard(row: CardRow): Node {
   );
 }
 
-function renderProgressBar(pct: number): Node {
+function renderProgressBar(pct: number, theme: Theme): Node {
   const clamped = Math.max(0, Math.min(100, pct));
   const innerWidth = BAR_WIDTH - BAR_BORDER * 2 - 2; // account for inner padding
   const filled = Math.max(0, Math.round((clamped / 100) * innerWidth));
@@ -221,7 +235,7 @@ function renderProgressBar(pct: number): Node {
       display: "flex",
       width: BAR_WIDTH,
       height: BAR_HEIGHT,
-      border: `${BAR_BORDER}px solid black`,
+      border: `${BAR_BORDER}px solid ${theme.fg}`,
       padding: 1,
       alignItems: "stretch",
     },
@@ -231,7 +245,7 @@ function renderProgressBar(pct: number): Node {
           display: "flex",
           width: filled,
           height: "100%",
-          backgroundColor: "black",
+          backgroundColor: theme.fg,
         },
         "",
       ),
