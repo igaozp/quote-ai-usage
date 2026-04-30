@@ -19,6 +19,17 @@ function buildClaudeRow(usage: DailyUsage): CardRow {
       meta: `RESETS ${formatCountdown(secondsUntilMidnight(usage.timezone))}`,
     };
   }
+  if (claude.rateLimit) {
+    const rl = claude.rateLimit;
+    const pct = rl.utilization * 100;
+    const remainingSec = rl.resetsAt - Math.floor(Date.now() / 1000);
+    return {
+      label: "CLAUDE",
+      primary: `${Math.round(pct)}% USED`,
+      progressPct: pct,
+      meta: `RESETS ${formatCountdown(remainingSec)}`,
+    };
+  }
   const tokens =
     claude.inputTokens +
     claude.outputTokens +

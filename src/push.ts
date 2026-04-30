@@ -1,5 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { collectClaude } from "./collectors/claude.js";
+import { collectClaudeOAuth } from "./collectors/claude-oauth.js";
 import { collectCodex } from "./collectors/codex.js";
 import { dateInTz } from "./collectors/util.js";
 import type { DailyUsage } from "./collectors/types.js";
@@ -27,13 +28,19 @@ export async function collectAndPush(opts: PushOptions): Promise<PushResult> {
   const tz = resolveTimezone(opts.env);
   const date = opts.date ?? new Date();
 
-  const [claude, codex] = await Promise.all([
+  const [claudeBase, oauthRateLimit, codex] = await Promise.all([
     collectClaude({
       date,
       timezone: tz,
       home: opts.env.CLAUDE_HOME?.trim() || undefined,
     }).catch((err) => {
       console.error("[claude] collect failed:", err);
+      return null;
+    }),
+    collectClaudeOAuth({
+      credentialsPath: opts.env.CLAUDE_CREDENTIALS_PATH?.trim() || undefined,
+    }).catch((err) => {
+      console.warn("[claude-oauth] collect failed:", err);
       return null;
     }),
     collectCodex({
@@ -45,6 +52,10 @@ export async function collectAndPush(opts: PushOptions): Promise<PushResult> {
       return null;
     }),
   ]);
+
+  const claude = claudeBase
+    ? { ...claudeBase, rateLimit: oauthRateLimit }
+    : null;
 
   const usage: DailyUsage = {
     date: dateInTz(date.getTime(), tz),

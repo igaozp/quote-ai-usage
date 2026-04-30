@@ -20,15 +20,20 @@ Cloudflare Workers。
 - bin 直接指向 `./src/cli.ts`，shebang `#!/usr/bin/env bun`；不要再写
   Node wrapper
 
-## 数据源是只读 JSONL，不调任何 LLM 平台 API
+## 数据源
 
 - `~/.claude/projects/<slug>/<sessionId>.jsonl`：解析 `message.usage` +
   `message.model`，按 `pricing.ts` 估算 USD
 - `~/.codex/sessions/<UTC YYYY/MM/DD>/rollout-…jsonl`：解析
   `event_msg.payload.token_count` 的 `last_token_usage`（增量累加，不要
   累加 `total_token_usage`）和最新一条 `rate_limits` 作为套餐快照
-- **绝对不要**新增模拟登录 / 抓网页 / 读浏览器 cookie / 调 Anthropic
-  / OpenAI 任何 admin API
+- `~/.claude/.credentials.json` + `GET https://api.anthropic.com/api/oauth/usage`
+  （header `anthropic-beta: oauth-2025-04-20`）：读取 Claude Pro/Max 五小时配额
+  利用率（`five_hour.utilization` + `five_hour.resets_at`）。此调用是**唯一**被
+  允许的 Anthropic 平台 API 调用；token 来自本地凭证文件，无需用户另行配置。
+  失败时静默返回 null，不影响其他展示，回退到 USD 用量显示。
+- **绝对不要**新增模拟登录 / 抓网页 / 读浏览器 cookie / 调 Anthropic completions
+  / admin / billing / OpenAI 任何 API（OAuth usage 端点除外）
 
 ## 时区一律走字符串比较
 
@@ -62,6 +67,8 @@ Codex 的 token 总数与 `primary.usedPercent`，**不要**给 Codex 加 USD �
 - 隐藏输入实现在 `src/prompt.ts`，使用 raw-mode + 字符级 echo `*`，不依赖
   外部库；非 TTY 时 fallback 到普通 readline
 - 不要把任何 secret commit 进仓库；配置文件本身在用户 HOME 目录而非项目内
+- `CLAUDE_CREDENTIALS_PATH`：覆盖 OAuth 凭证文件路径，默认
+  `~/.claude/.credentials.json`
 
 ## CLI 入口
 
@@ -106,6 +113,7 @@ Codex 的 token 总数与 `primary.usedPercent`，**不要**给 Codex 加 USD �
 - 不要把字体或 jsonl 样本 commit 进仓库
 - 不要绕过 `DotClient` 直接 `fetch` Dot API（会丢错误处理）
 - 不要在收集器里读 `total_token_usage` 累加（会重复计数）
+- 不要在 OAuth usage 端点之外再调任何 Anthropic API（completions、admin、billing 等）
 
 ## 待办（详见 docs/roadmap.md）
 

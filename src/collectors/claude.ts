@@ -70,6 +70,7 @@ function emptyMetric(): ClaudeMetric {
     cacheReadTokens: 0,
     estUsd: 0,
     byModel: {},
+    rateLimit: null,
   };
 }
 
