@@ -1,5 +1,6 @@
 export { collectAndPush, type PushOptions, type PushResult } from "./push.js";
 export { collectClaude } from "./collectors/claude.js";
+export { collectClaudeOAuth } from "./collectors/claude-oauth.js";
 export { collectCodex } from "./collectors/codex.js";
 export { buildUsageData, formatTokens } from "./aggregate.js";
 export { renderUsageCardLocal } from "./render.node.js";
@@ -22,6 +23,7 @@ export type {
   DailyUsage,
   ClaudeMetric,
   ClaudeModelMetric,
+  ClaudeRateLimit,
   CodexMetric,
   CodexRateLimit,
 } from "./collectors/types.js";

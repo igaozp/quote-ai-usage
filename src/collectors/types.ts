@@ -6,6 +6,13 @@ export interface ClaudeModelMetric {
   estUsd: number;
 }
 
+export interface ClaudeRateLimit {
+  /** 0–1 fraction of quota consumed */
+  utilization: number;
+  /** Unix epoch seconds when this window resets */
+  resetsAt: number;
+}
+
 export interface ClaudeMetric {
   inputTokens: number;
   outputTokens: number;
@@ -13,6 +20,8 @@ export interface ClaudeMetric {
   cacheReadTokens: number;
   estUsd: number;
   byModel: Record<string, ClaudeModelMetric>;
+  /** Five-hour rolling rate-limit window from OAuth usage API. null when unavailable. */
+  rateLimit: ClaudeRateLimit | null;
 }
 
 export interface CodexRateLimit {

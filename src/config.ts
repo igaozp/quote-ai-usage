@@ -20,6 +20,7 @@ export interface EnvLike {
   CODEX_HOME?: string;
   DEBUG_PNG?: string;
   QUOTE_AI_CACHE?: string;
+  CLAUDE_CREDENTIALS_PATH?: string;
 }
 
 export class ConfigMissingError extends Error {
