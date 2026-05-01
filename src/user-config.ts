@@ -1,11 +1,13 @@
 import { chmod, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { homedir, platform } from "node:os";
 import { join } from "node:path";
+import type { ColorMode } from "./render.js";
 
 export interface StoredConfig {
   apiKey?: string;
   deviceId?: string;
   baseUrl?: string;
+  theme?: ColorMode;
 }
 
 /**
@@ -34,6 +36,7 @@ export async function loadUserConfig(): Promise<StoredConfig> {
       apiKey: typeof obj.apiKey === "string" ? obj.apiKey : undefined,
       deviceId: typeof obj.deviceId === "string" ? obj.deviceId : undefined,
       baseUrl: typeof obj.baseUrl === "string" ? obj.baseUrl : undefined,
+      theme: obj.theme === "light" || obj.theme === "dark" ? obj.theme : undefined,
     };
   } catch {
     return {};

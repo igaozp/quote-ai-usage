@@ -1,9 +1,11 @@
-import { loadUserConfig } from "./user-config.js";
+import { loadUserConfig, type StoredConfig } from "./user-config.js";
+import type { ColorMode } from "./render.js";
 
 export interface AppConfig {
   apiKey: string;
   deviceId: string;
   baseUrl?: string;
+  theme: ColorMode;
 }
 
 export interface EnvLike {
@@ -11,6 +13,7 @@ export interface EnvLike {
   DOT_DEVICE_ID?: string;
   DOT_API_BASE_URL?: string;
   USAGE_TIMEZONE?: string;
+  USAGE_THEME?: string;
   USAGE_INTERVAL?: string;
   USAGE_COOLDOWN?: string;
   CLAUDE_HOME?: string;
@@ -48,9 +51,28 @@ export async function resolveAppConfig(env: EnvLike): Promise<AppConfig> {
     apiKey: apiKey!,
     deviceId: deviceId!,
     baseUrl: baseUrlRaw || undefined,
+    theme: resolveTheme(env, stored),
   };
 }
 
 export function resolveTimezone(env: EnvLike): string {
   return env.USAGE_TIMEZONE?.trim() || "Asia/Shanghai";
+}
+
+/**
+ * Resolve the color mode (env > file > "light"). Unknown values fall back to
+ * "light" with a stderr warning instead of throwing — this code path runs
+ * inside plugin Stop hooks where any throw would block the calling tool.
+ */
+export function resolveTheme(
+  env: EnvLike,
+  stored?: StoredConfig,
+): ColorMode {
+  const raw = env.USAGE_THEME?.trim() || stored?.theme?.trim() || "";
+  if (!raw) return "light";
+  if (raw === "light" || raw === "dark") return raw;
+  console.error(
+    `[config] unknown USAGE_THEME=${JSON.stringify(raw)}; using "light".`,
+  );
+  return "light";
 }
