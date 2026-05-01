@@ -14,7 +14,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const fontsDir = resolve(here, "..", "assets", "fonts");
 
 let initialized = false;
-let cachedFonts: { regular: ArrayBuffer; bold: ArrayBuffer } | null = null;
+let cachedFont: ArrayBuffer | null = null;
 
 async function initOnce() {
   if (initialized) return;
@@ -46,13 +46,9 @@ async function loadFont(filename: string): Promise<ArrayBuffer> {
 }
 
 async function loadFonts() {
-  if (cachedFonts) return cachedFonts;
-  const [regular, bold] = await Promise.all([
-    loadFont("Regular.ttf"),
-    loadFont("Bold.ttf"),
-  ]);
-  cachedFonts = { regular, bold };
-  return cachedFonts;
+  if (cachedFont) return cachedFont;
+  cachedFont = await loadFont("Regular.ttf");
+  return cachedFont;
 }
 
 export async function renderUsageCardLocal(
@@ -60,12 +56,9 @@ export async function renderUsageCardLocal(
   mode?: ColorMode,
 ): Promise<Uint8Array> {
   await initOnce();
-  const { regular, bold } = await loadFonts();
+  const regular = await loadFonts();
   return renderUsageCard(data, {
-    fonts: [
-      { name: "UI", data: regular, weight: 400 },
-      { name: "UI", data: bold, weight: 700 },
-    ],
+    fonts: [{ name: "UI", data: regular, weight: 400 }],
     mode,
   });
 }

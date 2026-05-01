@@ -1,13 +1,12 @@
 # Fonts
 
-`satori` requires real font files to render text. Drop two **static TTF** files
+`satori` requires a real font file to render text. Drop one **static TTF** file
 here before running the app:
 
-- `Regular.ttf` — body text (weight 400)
-- `Bold.ttf` — emphasized text (weight 700)
+- `Regular.ttf` — all text (weight 400)
 
 You can use any TTF you like as long as it covers the glyphs you render.
-Variable fonts are **not** supported by satori — make sure to use static TTFs.
+Variable fonts are **not** supported by satori — make sure to use a static TTF.
 
 ## Recommended: Inter
 
@@ -15,9 +14,7 @@ Variable fonts are **not** supported by satori — make sure to use static TTFs.
    https://github.com/rsms/inter/releases (pick the latest `Inter-x.y.zip`)
 2. From `Inter Desktop/`, copy:
    - `Inter-Regular.ttf` → `assets/fonts/Regular.ttf`
-   - `Inter-Bold.ttf` → `assets/fonts/Bold.ttf`
 
 ## Notes
 
-- These files are gitignored — each developer / deployment provides its own.
-- For Cloudflare Workers we'll bundle the same TTFs as binary assets later.
+- This file is gitignored — each developer / deployment provides its own.

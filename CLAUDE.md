@@ -51,7 +51,7 @@ Codex 的 token 总数与 `primary.usedPercent`，**不要**给 Codex 加 USD �
 - 容器节点必须显式 `display: 'flex'`，否则 yoga 不生效
 - 不支持 grid / float / 复杂 CSS / variable font
 - 颜色用纯黑白：屏幕 dither 后灰度信息丢失
-- 字体只接受静态 TTF，命名固定为 `assets/fonts/Regular.ttf` / `Bold.ttf`
+- 字体只接受静态 TTF，命名固定为 `assets/fonts/Regular.ttf`
 - 改尺寸要同步改 `render.ts` 的 `CARD_WIDTH/HEIGHT` 与 Dot API 推送参数
 
 ## 配置读取

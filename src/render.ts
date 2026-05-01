@@ -128,7 +128,6 @@ function buildTree(data: UsageData, theme: Theme): Node {
           display: "flex",
           padding: `6px ${PADDING_X}px 2px`,
           fontSize: 13,
-          fontWeight: 700,
           letterSpacing: 2,
         },
         data.title,
@@ -172,7 +171,6 @@ function renderCard(row: CardRow, theme: Theme): Node {
             {
               display: "flex",
               fontSize: 9,
-              fontWeight: 700,
               letterSpacing: 2,
             },
             row.label,
@@ -181,7 +179,6 @@ function renderCard(row: CardRow, theme: Theme): Node {
             {
               display: "flex",
               fontSize: 17,
-              fontWeight: 700,
               lineHeight: 1,
             },
             row.primary,
@@ -204,7 +201,6 @@ function renderCard(row: CardRow, theme: Theme): Node {
                   {
                     display: "flex",
                     fontSize: 10,
-                    fontWeight: 700,
                   },
                   row.secondary,
                 )
@@ -214,7 +210,6 @@ function renderCard(row: CardRow, theme: Theme): Node {
                 {
                   display: "flex",
                   fontSize: 9,
-                  fontWeight: 400,
                   letterSpacing: 1,
                 },
                 row.meta,

@@ -28,11 +28,11 @@ SVG 字符串
 
 - **尺寸**：`CARD_WIDTH=296`、`CARD_HEIGHT=152`（在 `src/render.ts`）
 - **字体**：必须**静态 TTF**（satori 不接受 variable font）。命名固定为
-  `assets/fonts/Regular.ttf`（400）与 `Bold.ttf`（700）
+  `assets/fonts/Regular.ttf`（weight 400），全局统一字重
 - **flex 布局**：所有有子节点的容器都要显式 `display: 'flex'`，satori 用
   yoga 子集，不会回退 block
-- **纯黑白**：屏幕最终经 dither，灰度信息会丢失。当前模板靠字号 / 字距 /
-  字重区分层级，不依赖颜色或 opacity
+- **纯黑白**：屏幕最终经 dither，灰度信息会丢失。当前模板靠字号 / 字距
+  区分层级，不依赖颜色、opacity 或字重
 
 ## 当前模板
 
